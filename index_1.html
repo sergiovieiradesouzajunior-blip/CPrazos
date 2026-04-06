@@ -1,0 +1,2077 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPrazos - Calculadora de Prazos Jurídicos</title>
+    <style>
+        /* ===== VARIÁVEIS CSS ===== */
+        :root {
+            --primary: #1a365d;
+            --primary-light: #2c5282;
+            --secondary: #38a169;
+            --danger: #e53e3e;
+            --warning: #dd6b20;
+            --bg-light: #f7fafc;
+            --bg-white: #ffffff;
+            --text-dark: #1a202c;
+            --text-muted: #718096;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+            --radius-lg: 12px;
+        }
+
+        /* Tema escuro */
+        [data-theme="dark"] {
+            --primary: #63b3ed;
+            --primary-light: #90cdf4;
+            --secondary: #68d391;
+            --bg-light: #1a202c;
+            --bg-white: #2d3748;
+            --text-dark: #f7fafc;
+            --text-muted: #a0aec0;
+            --border: #4a5568;
+        }
+
+        /* ===== RESET E BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ===== LAYOUT ===== */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        header h1 svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--bg-white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ===== FORMULÁRIOS ===== */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            background: var(--bg-white);
+            color: var(--text-dark);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+
+        input[type="date"] {
+            cursor: pointer;
+        }
+
+        /* ===== RADIO E CHECKBOX ===== */
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .radio-item, .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .radio-item:has(input:checked), .checkbox-item:has(input:checked) {
+            border-color: var(--primary);
+            background: rgba(66, 153, 225, 0.1);
+        }
+
+        .radio-item input, .checkbox-item input {
+            width: auto;
+            margin: 0;
+            accent-color: var(--primary);
+        }
+
+        /* ===== GRID ===== */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== BOTÕES ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-success {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* ===== FASES ===== */
+        .fase-container {
+            border: 2px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            background: var(--bg-light);
+        }
+
+        .fase-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .fase-numero {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .btn-remove-fase {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .btn-remove-fase:hover {
+            background: rgba(229, 62, 62, 0.1);
+        }
+
+        /* ===== TABELA DE RESULTADOS ===== */
+        .resultado-container {
+            display: none;
+        }
+
+        .resultado-container.visible {
+            display: block;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 0.875rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        th:first-child {
+            border-radius: var(--radius) 0 0 0;
+        }
+
+        th:last-child {
+            border-radius: 0 var(--radius) 0 0;
+        }
+
+        tr:nth-child(even) {
+            background: var(--bg-light);
+        }
+
+        tr:hover {
+            background: rgba(66, 153, 225, 0.05);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(56, 161, 105, 0.2);
+            color: var(--secondary);
+        }
+
+        .badge-warning {
+            background: rgba(221, 107, 32, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(229, 62, 62, 0.2);
+            color: var(--danger);
+        }
+
+        .observacoes {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+        }
+
+        .observacoes h4 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .observacoes ul {
+            margin-left: 1.25rem;
+        }
+
+        /* ===== MODAL ===== */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-backdrop.visible {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-white);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0.5rem;
+        }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 2000;
+        }
+
+        .toast {
+            background: var(--bg-white);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+            border-left: 4px solid var(--primary);
+        }
+
+        .toast.success {
+            border-left-color: var(--secondary);
+        }
+
+        .toast.error {
+            border-left-color: var(--danger);
+        }
+
+        .toast.warning {
+            border-left-color: var(--warning);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ===== LISTA DE FERIADOS ===== */
+        .feriado-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--bg-light);
+            border-radius: var(--radius);
+            margin-bottom: 0.5rem;
+        }
+
+        .feriado-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feriado-data {
+            font-weight: 600;
+        }
+
+        .feriado-nome {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .feriado-tipo {
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 10px;
+        }
+
+        /* ===== AUTOCOMPLETE ===== */
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-white);
+            border: 2px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 var(--radius) var(--radius);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .autocomplete-list.visible {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .autocomplete-item:hover {
+            background: var(--bg-light);
+        }
+
+        /* ===== STEPPER ===== */
+        .stepper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+        }
+
+        .step-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--border);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .step.active .step-circle {
+            background: var(--primary);
+            color: white;
+        }
+
+        .step.completed .step-circle {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .step-line {
+            width: 60px;
+            height: 3px;
+            background: var(--border);
+            margin: 0 0.5rem;
+        }
+
+        .step.completed + .step .step-line,
+        .step.completed .step-line {
+            background: var(--secondary);
+        }
+
+        /* ===== LOADING ===== */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading.visible {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== HIDDEN ===== */
+        .hidden {
+            display: none !important;
+        }
+
+        /* ===== RESPONSIVO ===== */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.25rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .radio-group, .checkbox-group {
+                flex-direction: column;
+            }
+
+            .radio-item, .checkbox-item {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== HEADER ===== -->
+    <header>
+        <div class="container">
+            <h1>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                CPrazos
+            </h1>
+            <div class="header-actions">
+                <button class="btn-icon" onclick="abrirModalFeriados()" title="Gestão de Feriados">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
+                <button class="btn-icon" onclick="alternarTema()" title="Alternar Tema">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== MAIN ===== -->
+    <main id="app">
+        <!-- Stepper -->
+        <div class="stepper">
+            <div class="step active" data-step="1">
+                <div class="step-circle">1</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step" data-step="2">
+                <div class="step-circle">2</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step" data-step="3">
+                <div class="step-circle">3</div>
+            </div>
+        </div>
+
+        <!-- ETAPA 1: Configuração -->
+        <div id="etapa1" class="etapa">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                    Configuração do Cálculo
+                </h2>
+
+                <!-- Âmbito -->
+                <div class="form-group">
+                    <label>Âmbito</label>
+                    <div class="radio-group">
+                        <label class="radio-item">
+                            <input type="radio" name="ambito" value="judicial" checked onchange="atualizarAmbito()">
+                            <span>Judicial</span>
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="ambito" value="administrativo" onchange="atualizarAmbito()">
+                            <span>Administrativo</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Regime Judicial -->
+                <div id="regimeJudicial" class="form-group">
+                    <label>Regime de Contagem</label>
+                    <div class="radio-group">
+                        <label class="radio-item">
+                            <input type="radio" name="regime" value="cpc" checked>
+                            <span>CPC/2015</span>
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="regime" value="cpp">
+                            <span>CPP</span>
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="regime" value="cc">
+                            <span>Código Civil</span>
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="regime" value="penal">
+                            <span>Penal Material</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Regime Administrativo -->
+                <div id="regimeAdministrativo" class="form-group hidden">
+                    <label>Esfera Administrativa</label>
+                    <div class="radio-group">
+                        <label class="radio-item">
+                            <input type="radio" name="esfera" value="federal" checked onchange="atualizarEsfera()">
+                            <span>Federal (Lei 9.784/99)</span>
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="esfera" value="estadual" onchange="atualizarEsfera()">
+                            <span>Estadual</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Estado (quando estadual) -->
+                <div id="selecaoEstado" class="form-group hidden">
+                    <label>Estado</label>
+                    <select id="estado" onchange="atualizarEstado()">
+                        <option value="">Selecione o estado...</option>
+                    </select>
+                </div>
+
+                <!-- Checkbox município -->
+                <div id="checkMunicipio" class="form-group hidden">
+                    <label class="checkbox-item" style="max-width: 300px;">
+                        <input type="checkbox" id="considerarMunicipio" onchange="toggleMunicipio()">
+                        <span>Considerar feriados municipais</span>
+                    </label>
+                </div>
+
+                <!-- Busca cidade -->
+                <div id="buscaCidade" class="form-group hidden">
+                    <label>Cidade</label>
+                    <div class="autocomplete-container">
+                        <input type="text" id="cidade" placeholder="Digite o nome da cidade..." oninput="buscarCidade(this.value)">
+                        <div id="listaCidades" class="autocomplete-list"></div>
+                    </div>
+                </div>
+
+                <!-- Unidade de Medida -->
+                <div class="form-group">
+                    <label>Unidade de Medida</label>
+                    <div class="radio-group">
+                        <label class="radio-item">
+                            <input type="radio" name="unidade" value="dias" checked>
+                            <span>Dias</span>
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="unidade" value="horas">
+                            <span>Horas</span>
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="unidade" value="meses">
+                            <span>Meses</span>
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="unidade" value="anos">
+                            <span>Anos</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Modo -->
+                <div class="form-group">
+                    <label>Modo de Cálculo</label>
+                    <div class="radio-group">
+                        <label class="radio-item">
+                            <input type="radio" name="modo" value="unico" checked onchange="atualizarModo()">
+                            <span>Data Única</span>
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="modo" value="multiplas" onchange="atualizarModo()">
+                            <span>Múltiplas Fases</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Número de fases -->
+                <div id="numFases" class="form-group hidden">
+                    <label>Número de Fases</label>
+                    <input type="number" id="quantidadeFases" min="2" max="20" value="2" style="max-width: 150px;">
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary btn-block" onclick="avancarEtapa(2)">
+                        Avançar
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ETAPA 2: Fases -->
+        <div id="etapa2" class="etapa hidden">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    Definição de Prazos
+                </h2>
+
+                <div id="containerFases">
+                    <!-- Fases serão inseridas dinamicamente -->
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="avancarEtapa(1)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Voltar
+                    </button>
+                    <button class="btn btn-success btn-block" onclick="calcular()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                            <line x1="8" y1="6" x2="16" y2="6"></line>
+                            <line x1="8" y1="10" x2="16" y2="10"></line>
+                            <line x1="8" y1="14" x2="12" y2="14"></line>
+                        </svg>
+                        Calcular
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ETAPA 3: Resultados -->
+        <div id="etapa3" class="etapa hidden">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Resultado do Cálculo
+                </h2>
+
+                <div class="table-responsive">
+                    <table id="tabelaResultados">
+                        <thead>
+                            <tr>
+                                <th>Fase</th>
+                                <th>Prazo</th>
+                                <th>Início</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabela">
+                            <!-- Resultados inseridos dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="observacoesResultado" class="observacoes">
+                    <h4>Observações</h4>
+                    <ul id="listaObservacoes">
+                        <!-- Observações inseridas dinamicamente -->
+                    </ul>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="avancarEtapa(2)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Voltar
+                    </button>
+                    <button class="btn btn-primary" onclick="novoCalculo()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                        </svg>
+                        Novo Cálculo
+                    </button>
+                    <button class="btn btn-success" onclick="exportarPDF()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Exportar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <p>CPrazos - Calculadora de Prazos Jurídicos e Administrativos</p>
+        <p>Desenvolvido conforme CPC/2015, CPP, Código Civil e Lei 9.784/99</p>
+    </footer>
+
+    <!-- ===== MODAL FERIADOS ===== -->
+    <div id="modalFeriados" class="modal-backdrop">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Gestão de Feriados e Suspensões</h3>
+                <button class="btn-close" onclick="fecharModalFeriados()">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Adicionar Período de Suspensão</label>
+                <div class="grid-2">
+                    <div>
+                        <label style="font-size: 0.875rem;">Data Início</label>
+                        <input type="date" id="suspensaoInicio">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.875rem;">Data Fim</label>
+                        <input type="date" id="suspensaoFim">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Descrição</label>
+                <input type="text" id="suspensaoDescricao" placeholder="Ex: Recesso Judiciário TJMG">
+            </div>
+
+            <button class="btn btn-primary btn-block" onclick="adicionarSuspensao()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Adicionar Suspensão
+            </button>
+
+            <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
+
+            <h4 style="margin-bottom: 1rem;">Períodos Cadastrados</h4>
+            <div id="listaSuspensoes">
+                <!-- Suspensões inseridas dinamicamente -->
+            </div>
+
+            <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
+
+            <h4 style="margin-bottom: 1rem;">Feriados do Ano</h4>
+            <div id="listaFeriados">
+                <!-- Feriados inseridos dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+        // ===== CONFIGURAÇÃO =====
+        const CONFIG = {
+            feriados: {
+                nacionais: [],
+                estaduais: {},
+                municipais: {}
+            },
+            suspensoes: [],
+            recessoJudiciario: {
+                inicio: "12-20",
+                fim: "01-20",
+                aplicaA: ["todos"]
+            }
+        };
+
+        // Regras de contagem por regime
+        const REGRAS = {
+            cpc: {
+                nome: "CPC/2015",
+                baseLegal: "Art. 219",
+                tipo: "uteis",
+                incluiDiaInicial: false,
+                incluiDiaFinal: true,
+                prorroga: true
+            },
+            cpp: {
+                nome: "CPP",
+                baseLegal: "Art. 798",
+                tipo: "corridos",
+                incluiDiaInicial: true,
+                incluiDiaFinal: true,
+                prorroga: false
+            },
+            cc: {
+                nome: "Código Civil",
+                baseLegal: "Art. 132",
+                tipo: "corridos",
+                incluiDiaInicial: false,
+                incluiDiaFinal: true,
+                prorroga: true
+            },
+            penal: {
+                nome: "Penal Material",
+                baseLegal: "CP Art. 10",
+                tipo: "corridos",
+                incluiDiaInicial: true,
+                incluiDiaFinal: true,
+                prorroga: false
+            },
+            administrativo: {
+                nome: "Lei 9.784/99",
+                baseLegal: "Art. 66",
+                tipo: "corridos",
+                incluiDiaInicial: false,
+                incluiDiaFinal: true,
+                prorroga: true
+            }
+        };
+
+        // ===== DADOS MOCK =====
+        const ESTADOS = [
+            { sigla: "AC", nome: "Acre" },
+            { sigla: "AL", nome: "Alagoas" },
+            { sigla: "AP", nome: "Amapá" },
+            { sigla: "AM", nome: "Amazonas" },
+            { sigla: "BA", nome: "Bahia" },
+            { sigla: "CE", nome: "Ceará" },
+            { sigla: "DF", nome: "Distrito Federal" },
+            { sigla: "ES", nome: "Espírito Santo" },
+            { sigla: "GO", nome: "Goiás" },
+            { sigla: "MA", nome: "Maranhão" },
+            { sigla: "MT", nome: "Mato Grosso" },
+            { sigla: "MS", nome: "Mato Grosso do Sul" },
+            { sigla: "MG", nome: "Minas Gerais" },
+            { sigla: "PA", nome: "Pará" },
+            { sigla: "PB", nome: "Paraíba" },
+            { sigla: "PR", nome: "Paraná" },
+            { sigla: "PE", nome: "Pernambuco" },
+            { sigla: "PI", nome: "Piauí" },
+            { sigla: "RJ", nome: "Rio de Janeiro" },
+            { sigla: "RN", nome: "Rio Grande do Norte" },
+            { sigla: "RS", nome: "Rio Grande do Sul" },
+            { sigla: "RO", nome: "Rondônia" },
+            { sigla: "RR", nome: "Roraima" },
+            { sigla: "SC", nome: "Santa Catarina" },
+            { sigla: "SP", nome: "São Paulo" },
+            { sigla: "SE", nome: "Sergipe" },
+            { sigla: "TO", nome: "Tocantins" }
+        ];
+
+        // Feriados fixos nacionais (datas que não mudam)
+        const FERIADOS_FIXOS = [
+            { data: "01-01", nome: "Confraternização Universal" },
+            { data: "04-21", nome: "Tiradentes" },
+            { data: "05-01", nome: "Dia do Trabalhador" },
+            { data: "09-07", nome: "Independência do Brasil" },
+            { data: "10-12", nome: "Nossa Senhora Aparecida" },
+            { data: "11-02", nome: "Finados" },
+            { data: "11-15", nome: "Proclamação da República" },
+            { data: "11-20", nome: "Dia da Consciência Negra" },
+            { data: "12-25", nome: "Natal" }
+        ];
+        
+        // Feriados móveis 2026 (fallback caso a API falhe)
+        // Estes são calculados com base na Páscoa de 2026 (05/04/2026)
+        const FERIADOS_MOVEIS_2026 = [
+            { data: "2026-02-16", nome: "Carnaval" },
+            { data: "2026-02-17", nome: "Carnaval" },
+            { data: "2026-04-03", nome: "Sexta-feira Santa" },
+            { data: "2026-04-05", nome: "Páscoa" },
+            { data: "2026-06-04", nome: "Corpus Christi" }
+        ];
+
+        // Cidades mock (algumas principais por estado)
+        const CIDADES = {
+            "MG": ["Belo Horizonte", "Uberlândia", "Contagem", "Juiz de Fora", "Betim", "Montes Claros", "Ribeirão das Neves", "Uberaba", "Governador Valadares", "Ipatinga"],
+            "SP": ["São Paulo", "Guarulhos", "Campinas", "São Bernardo do Campo", "Santo André", "Osasco", "Ribeirão Preto", "Sorocaba", "Santos", "São José dos Campos"],
+            "RJ": ["Rio de Janeiro", "São Gonçalo", "Duque de Caxias", "Nova Iguaçu", "Niterói", "Belford Roxo", "Campos dos Goytacazes", "Petrópolis", "Volta Redonda", "Macaé"],
+            "BA": ["Salvador", "Feira de Santana", "Vitória da Conquista", "Camaçari", "Itabuna", "Juazeiro", "Lauro de Freitas", "Ilhéus", "Jequié", "Teixeira de Freitas"],
+            "RS": ["Porto Alegre", "Caxias do Sul", "Pelotas", "Canoas", "Santa Maria", "Gravataí", "Viamão", "Novo Hamburgo", "São Leopoldo", "Rio Grande"],
+            "PR": ["Curitiba", "Londrina", "Maringá", "Ponta Grossa", "Cascavel", "São José dos Pinhais", "Foz do Iguaçu", "Colombo", "Guarapuava", "Paranaguá"]
+        };
+
+        // Estado da aplicação
+        let estadoApp = {
+            etapaAtual: 1,
+            fases: [],
+            resultados: [],
+            observacoes: [],
+            estadoSelecionado: "",
+            cidadeSelecionada: ""
+        };
+
+        // ===== FUNÇÕES DE UI =====
+
+        /**
+         * Atualiza a exibição do âmbito selecionado
+         */
+        function atualizarAmbito() {
+            const ambito = document.querySelector('input[name="ambito"]:checked').value;
+            const regimeJudicial = document.getElementById('regimeJudicial');
+            const regimeAdministrativo = document.getElementById('regimeAdministrativo');
+
+            if (ambito === 'judicial') {
+                regimeJudicial.classList.remove('hidden');
+                regimeAdministrativo.classList.add('hidden');
+                document.getElementById('selecaoEstado').classList.add('hidden');
+                document.getElementById('checkMunicipio').classList.add('hidden');
+                document.getElementById('buscaCidade').classList.add('hidden');
+            } else {
+                regimeJudicial.classList.add('hidden');
+                regimeAdministrativo.classList.remove('hidden');
+                atualizarEsfera();
+            }
+        }
+
+        /**
+         * Atualiza a exibição da esfera administrativa
+         */
+        function atualizarEsfera() {
+            const esfera = document.querySelector('input[name="esfera"]:checked').value;
+            const selecaoEstado = document.getElementById('selecaoEstado');
+            const checkMunicipio = document.getElementById('checkMunicipio');
+
+            if (esfera === 'estadual') {
+                selecaoEstado.classList.remove('hidden');
+                checkMunicipio.classList.remove('hidden');
+            } else {
+                selecaoEstado.classList.add('hidden');
+                checkMunicipio.classList.add('hidden');
+                document.getElementById('buscaCidade').classList.add('hidden');
+            }
+        }
+
+        /**
+         * Atualiza quando o estado é selecionado
+         */
+        function atualizarEstado() {
+            estadoApp.estadoSelecionado = document.getElementById('estado').value;
+        }
+
+        /**
+         * Toggle da opção de município
+         */
+        function toggleMunicipio() {
+            const checked = document.getElementById('considerarMunicipio').checked;
+            const buscaCidade = document.getElementById('buscaCidade');
+
+            if (checked) {
+                buscaCidade.classList.remove('hidden');
+            } else {
+                buscaCidade.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Busca cidades com autocomplete
+         */
+        function buscarCidade(termo) {
+            const lista = document.getElementById('listaCidades');
+            const estado = document.getElementById('estado').value;
+
+            if (!estado || termo.length < 2) {
+                lista.classList.remove('visible');
+                return;
+            }
+
+            const cidades = CIDADES[estado] || [];
+            const filtradas = cidades.filter(c => 
+                c.toLowerCase().includes(termo.toLowerCase())
+            );
+
+            if (filtradas.length > 0) {
+                lista.innerHTML = filtradas.map(c => 
+                    `<div class="autocomplete-item" onclick="selecionarCidade('${c}')">${c}</div>`
+                ).join('');
+                lista.classList.add('visible');
+            } else {
+                lista.classList.remove('visible');
+            }
+        }
+
+        /**
+         * Seleciona uma cidade da lista
+         */
+        function selecionarCidade(cidade) {
+            document.getElementById('cidade').value = cidade;
+            document.getElementById('listaCidades').classList.remove('visible');
+            estadoApp.cidadeSelecionada = cidade;
+        }
+
+        /**
+         * Atualiza o modo de cálculo
+         */
+        function atualizarModo() {
+            const modo = document.querySelector('input[name="modo"]:checked').value;
+            const numFases = document.getElementById('numFases');
+
+            if (modo === 'multiplas') {
+                numFases.classList.remove('hidden');
+            } else {
+                numFases.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Avança para a etapa especificada
+         */
+        function avancarEtapa(etapa) {
+            // Validações antes de avançar
+            if (estadoApp.etapaAtual === 1 && etapa === 2) {
+                if (!validarEtapa1()) return;
+                gerarFases();
+            }
+
+            // Atualiza stepper
+            document.querySelectorAll('.step').forEach((step, index) => {
+                const stepNum = index + 1;
+                step.classList.remove('active', 'completed');
+                
+                if (stepNum < etapa) {
+                    step.classList.add('completed');
+                } else if (stepNum === etapa) {
+                    step.classList.add('active');
+                }
+            });
+
+            // Esconde todas as etapas
+            document.querySelectorAll('.etapa').forEach(e => e.classList.add('hidden'));
+
+            // Mostra a etapa atual
+            document.getElementById(`etapa${etapa}`).classList.remove('hidden');
+
+            estadoApp.etapaAtual = etapa;
+
+            // Scroll para o topo
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /**
+         * Valida a etapa 1
+         */
+        function validarEtapa1() {
+            const ambito = document.querySelector('input[name="ambito"]:checked').value;
+            
+            if (ambito === 'administrativo') {
+                const esfera = document.querySelector('input[name="esfera"]:checked').value;
+                if (esfera === 'estadual') {
+                    const estado = document.getElementById('estado').value;
+                    if (!estado) {
+                        mostrarToast('Selecione um estado', 'error');
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        /**
+         * Gera os campos de fases
+         */
+        function gerarFases() {
+            const modo = document.querySelector('input[name="modo"]:checked').value;
+            const container = document.getElementById('containerFases');
+            const numFases = modo === 'multiplas' ? 
+                parseInt(document.getElementById('quantidadeFases').value) : 1;
+
+            container.innerHTML = '';
+            estadoApp.fases = [];
+
+            for (let i = 0; i < numFases; i++) {
+                const faseNum = i + 1;
+                estadoApp.fases.push({
+                    numero: faseNum,
+                    prazo: 0,
+                    tipoContagem: 'uteis',
+                    tipoInicio: 'data',
+                    dataInicio: '',
+                    descricao: ''
+                });
+
+                const faseHtml = `
+                    <div class="fase-container" data-fase="${faseNum}">
+                        <div class="fase-header">
+                            <span class="fase-numero">Fase ${faseNum}</span>
+                            ${numFases > 1 ? `
+                                <button class="btn-remove-fase" onclick="removerFase(${faseNum})" title="Remover fase">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label>Prazo</label>
+                                <input type="number" min="1" max="3650" value="15" 
+                                    onchange="atualizarFase(${faseNum}, 'prazo', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Unidade</label>
+                                <select onchange="atualizarFase(${faseNum}, 'unidade', this.value)">
+                                    <option value="dias">Dias</option>
+                                    <option value="horas">Horas</option>
+                                    <option value="meses">Meses</option>
+                                    <option value="anos">Anos</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Contagem</label>
+                                <select onchange="atualizarFase(${faseNum}, 'tipoContagem', this.value)">
+                                    <option value="uteis">Dias Úteis</option>
+                                    <option value="corridos">Dias Corridos</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Início da Contagem</label>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="tipoInicio${faseNum}" value="data" checked
+                                        onchange="atualizarTipoInicio(${faseNum}, 'data')">
+                                    <span>Data Específica</span>
+                                </label>
+                                ${faseNum > 1 ? `
+                                    <label class="radio-item">
+                                        <input type="radio" name="tipoInicio${faseNum}" value="anterior"
+                                            onchange="atualizarTipoInicio(${faseNum}, 'anterior')">
+                                        <span>Término da Fase Anterior</span>
+                                    </label>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="dataInicioContainer${faseNum}">
+                            <label>Data de Início</label>
+                            <input type="date" id="dataInicio${faseNum}" 
+                                onchange="atualizarFase(${faseNum}, 'dataInicio', this.value)">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Descrição (opcional)</label>
+                            <input type="text" placeholder="Ex: Prazo para contestação"
+                                onchange="atualizarFase(${faseNum}, 'descricao', this.value)">
+                        </div>
+                    </div>
+                `;
+
+                container.insertAdjacentHTML('beforeend', faseHtml);
+            }
+        }
+
+        /**
+         * Atualiza os dados de uma fase
+         */
+        function atualizarFase(faseNum, campo, valor) {
+            const faseIndex = estadoApp.fases.findIndex(f => f.numero === faseNum);
+            if (faseIndex !== -1) {
+                estadoApp.fases[faseIndex][campo] = valor;
+            }
+        }
+
+        /**
+         * Atualiza o tipo de início de uma fase
+         */
+        function atualizarTipoInicio(faseNum, tipo) {
+            const container = document.getElementById(`dataInicioContainer${faseNum}`);
+            
+            if (tipo === 'anterior') {
+                container.classList.add('hidden');
+            } else {
+                container.classList.remove('hidden');
+            }
+
+            atualizarFase(faseNum, 'tipoInicio', tipo);
+        }
+
+        /**
+         * Remove uma fase
+         */
+        function removerFase(faseNum) {
+            if (estadoApp.fases.length <= 1) {
+                mostrarToast('Deve haver pelo menos uma fase', 'warning');
+                return;
+            }
+
+            estadoApp.fases = estadoApp.fases.filter(f => f.numero !== faseNum);
+            document.querySelector(`.fase-container[data-fase="${faseNum}"]`).remove();
+
+            // Renumera as fases
+            document.querySelectorAll('.fase-container').forEach((container, index) => {
+                const novoNum = index + 1;
+                container.dataset.fase = novoNum;
+                container.querySelector('.fase-numero').textContent = `Fase ${novoNum}`;
+            });
+        }
+
+        // ===== FUNÇÕES DE CÁLCULO =====
+
+        /**
+         * Calcula os prazos
+         */
+        function calcular() {
+            // Validação
+            if (!validarFases()) return;
+
+            estadoApp.resultados = [];
+            estadoApp.observacoes = [];
+
+            const ambito = document.querySelector('input[name="ambito"]:checked').value;
+            let regra;
+
+            if (ambito === 'judicial') {
+                const regime = document.querySelector('input[name="regime"]:checked').value;
+                regra = REGRAS[regime];
+            } else {
+                regra = REGRAS.administrativo;
+            }
+
+            let dataAnterior = null;
+
+            // Processa cada fase
+            document.querySelectorAll('.fase-container').forEach((container, index) => {
+                const faseNum = index + 1;
+                const prazoInput = container.querySelector('input[type="number"]');
+                const unidadeSelect = container.querySelectorAll('select')[0];
+                const contagemSelect = container.querySelectorAll('select')[1];
+                const tipoInicio = container.querySelector(`input[name="tipoInicio${faseNum}"]:checked`);
+                const dataInicioInput = container.querySelector(`#dataInicio${faseNum}`);
+                const descricaoInput = container.querySelector('input[type="text"]');
+
+                const prazo = parseInt(prazoInput.value);
+                const unidade = unidadeSelect.value;
+                const tipoContagem = contagemSelect.value;
+                
+                let dataInicio;
+                if (tipoInicio && tipoInicio.value === 'anterior' && dataAnterior) {
+                    dataInicio = new Date(dataAnterior);
+                } else {
+                    dataInicio = new Date(dataInicioInput.value + 'T12:00:00');
+                }
+
+                // Calcula a data final
+                const resultado = calcularDataFinal(dataInicio, prazo, unidade, tipoContagem, regra);
+
+                estadoApp.resultados.push({
+                    fase: faseNum,
+                    descricao: descricaoInput.value || `Fase ${faseNum}`,
+                    prazo: `${prazo} ${unidade} (${tipoContagem === 'uteis' ? 'úteis' : 'corridos'})`,
+                    inicio: formatarData(dataInicio),
+                    vencimento: formatarData(resultado.data),
+                    status: calcularStatus(resultado.data),
+                    prorrogado: resultado.prorrogado
+                });
+
+                if (resultado.prorrogado) {
+                    estadoApp.observacoes.push(
+                        `Fase ${faseNum}: Data prorrogada de ${formatarData(resultado.dataOriginal)} para ${formatarData(resultado.data)} (${resultado.motivoProrrogacao})`
+                    );
+                }
+
+                if (resultado.feriadosEncontrados.length > 0) {
+                    estadoApp.observacoes.push(
+                        `Fase ${faseNum}: Feriados considerados: ${resultado.feriadosEncontrados.join(', ')}`
+                    );
+                }
+
+                dataAnterior = resultado.data;
+            });
+
+            // Exibe resultados
+            exibirResultados();
+            avancarEtapa(3);
+        }
+
+        /**
+         * Valida as fases antes de calcular
+         */
+        function validarFases() {
+            let valido = true;
+
+            document.querySelectorAll('.fase-container').forEach((container, index) => {
+                const faseNum = index + 1;
+                const prazoInput = container.querySelector('input[type="number"]');
+                const tipoInicio = container.querySelector(`input[name="tipoInicio${faseNum}"]:checked`);
+                const dataInicioInput = container.querySelector(`#dataInicio${faseNum}`);
+
+                if (!prazoInput.value || parseInt(prazoInput.value) <= 0) {
+                    mostrarToast(`Fase ${faseNum}: Informe um prazo válido`, 'error');
+                    valido = false;
+                    return;
+                }
+
+                if ((!tipoInicio || tipoInicio.value === 'data') && !dataInicioInput.value) {
+                    mostrarToast(`Fase ${faseNum}: Informe a data de início`, 'error');
+                    valido = false;
+                    return;
+                }
+            });
+
+            return valido;
+        }
+
+        /**
+         * Calcula a data final considerando as regras
+         * 
+         * Regras de contagem:
+         * - CPC/2015 (Art. 219): Exclui dia inicial, inclui dia final, só dias úteis, prorroga
+         * - CPP (Art. 798): Inclui dia inicial, inclui dia final, dias corridos, não prorroga
+         * - CC (Art. 132): Exclui dia inicial, inclui dia final, dias corridos, prorroga
+         * - Penal Material (CP Art. 10): Inclui dia inicial, inclui dia final, dias corridos, não prorroga
+         * - Lei 9.784/99 (Art. 66): Exclui dia inicial, inclui dia final, dias corridos, prorroga
+         */
+        function calcularDataFinal(dataInicio, prazo, unidade, tipoContagem, regra) {
+            let data = new Date(dataInicio);
+            let dataOriginal = null;
+            let prorrogado = false;
+            let motivoProrrogacao = '';
+            let feriadosEncontrados = [];
+
+            // Calcula com base na unidade
+            switch (unidade) {
+                case 'horas':
+                    data.setHours(data.getHours() + prazo);
+                    break;
+
+                case 'meses':
+                    const diaOriginal = data.getDate();
+                    data.setMonth(data.getMonth() + prazo);
+                    // Se o dia não existe no mês destino, vai para o último dia
+                    if (data.getDate() !== diaOriginal) {
+                        data.setDate(0); // Último dia do mês anterior
+                    }
+                    break;
+
+                case 'anos':
+                    const diaAno = data.getDate();
+                    const mesAno = data.getMonth();
+                    data.setFullYear(data.getFullYear() + prazo);
+                    // Trata 29/02 em ano não bissexto
+                    if (mesAno === 1 && diaAno === 29 && data.getDate() !== 29) {
+                        data.setDate(28);
+                    }
+                    break;
+
+                case 'dias':
+                default:
+                    if (tipoContagem === 'uteis' || regra.tipo === 'uteis') {
+                        // Contagem em dias ÚTEIS
+                        // Regra CPC Art. 219: exclui dia inicial, conta só dias úteis
+                        let diasContados = 0;
+                        
+                        while (diasContados < prazo) {
+                            // Avança para o próximo dia
+                            data.setDate(data.getDate() + 1);
+                            
+                            // Só conta se for dia útil
+                            if (isDiaUtil(data)) {
+                                diasContados++;
+                            } else {
+                                // Registra o motivo (feriado, fim de semana, etc.)
+                                const motivo = getMotivoDiaNaoUtil(data);
+                                if (motivo && !feriadosEncontrados.includes(motivo)) {
+                                    feriadosEncontrados.push(motivo);
+                                }
+                            }
+                        }
+                    } else {
+                        // Contagem em dias CORRIDOS
+                        if (regra.incluiDiaInicial) {
+                            // CPP/Penal: inclui dia inicial, então avança (prazo - 1) dias
+                            data.setDate(data.getDate() + prazo - 1);
+                        } else {
+                            // CC/Administrativo: exclui dia inicial, então avança prazo dias
+                            data.setDate(data.getDate() + prazo);
+                        }
+                    }
+                    break;
+            }
+
+            // Verifica prorrogação se aplicável
+            if (regra.prorroga && !isDiaUtil(data)) {
+                dataOriginal = new Date(data);
+                motivoProrrogacao = getMotivoDiaNaoUtil(data);
+                
+                while (!isDiaUtil(data)) {
+                    data.setDate(data.getDate() + 1);
+                }
+                prorrogado = true;
+            }
+
+            return {
+                data,
+                dataOriginal,
+                prorrogado,
+                motivoProrrogacao,
+                feriadosEncontrados
+            };
+        }
+
+        /**
+         * Verifica se é dia útil
+         */
+        function isDiaUtil(data) {
+            const diaSemana = data.getDay();
+            
+            // Sábado ou Domingo
+            if (diaSemana === 0 || diaSemana === 6) {
+                return false;
+            }
+
+            // Verifica feriados
+            if (isFeriado(data)) {
+                return false;
+            }
+
+            // Verifica suspensões
+            if (isSuspensao(data)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        /**
+         * Retorna o motivo de não ser dia útil
+         */
+        function getMotivoDiaNaoUtil(data) {
+            const diaSemana = data.getDay();
+            
+            if (diaSemana === 0) return 'Domingo';
+            if (diaSemana === 6) return 'Sábado';
+            
+            const feriado = getFeriadoNome(data);
+            if (feriado) return feriado;
+
+            const suspensao = getSuspensaoNome(data);
+            if (suspensao) return suspensao;
+
+            return null;
+        }
+
+        /**
+         * Verifica se a data é feriado
+         * Verifica: feriados fixos, feriados da API, e feriados móveis de fallback
+         */
+        function isFeriado(data) {
+            const mesdia = `${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`;
+            const dataISO = `${data.getFullYear()}-${mesdia}`;
+            
+            // Verifica feriados fixos (formato MM-DD)
+            if (FERIADOS_FIXOS.some(f => f.data === mesdia)) {
+                return true;
+            }
+            
+            // Verifica feriados da API (formato YYYY-MM-DD)
+            if (CONFIG.feriados.nacionais.some(f => f.data === dataISO)) {
+                return true;
+            }
+            
+            // Verifica feriados móveis de fallback 2026 (formato YYYY-MM-DD)
+            if (FERIADOS_MOVEIS_2026.some(f => f.data === dataISO)) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        /**
+         * Retorna o nome do feriado
+         */
+        function getFeriadoNome(data) {
+            const mesdia = `${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`;
+            const dataISO = `${data.getFullYear()}-${mesdia}`;
+            
+            // Busca em feriados fixos
+            const feriadoFixo = FERIADOS_FIXOS.find(f => f.data === mesdia);
+            if (feriadoFixo) return feriadoFixo.nome;
+            
+            // Busca em feriados da API
+            const feriadoAPI = CONFIG.feriados.nacionais.find(f => f.data === dataISO);
+            if (feriadoAPI) return feriadoAPI.nome;
+            
+            // Busca em feriados móveis de fallback
+            const feriadoMovel = FERIADOS_MOVEIS_2026.find(f => f.data === dataISO);
+            if (feriadoMovel) return feriadoMovel.nome;
+            
+            return null;
+        }
+
+        /**
+         * Verifica se a data está em período de suspensão
+         */
+        function isSuspensao(data) {
+            return CONFIG.suspensoes.some(s => {
+                const inicio = new Date(s.inicio);
+                const fim = new Date(s.fim);
+                return data >= inicio && data <= fim;
+            });
+        }
+
+        /**
+         * Retorna o nome da suspensão
+         */
+        function getSuspensaoNome(data) {
+            const suspensao = CONFIG.suspensoes.find(s => {
+                const inicio = new Date(s.inicio);
+                const fim = new Date(s.fim);
+                return data >= inicio && data <= fim;
+            });
+            return suspensao ? suspensao.descricao : null;
+        }
+
+        /**
+         * Calcula o status da data
+         */
+        function calcularStatus(data) {
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            data.setHours(0, 0, 0, 0);
+
+            const diffDias = Math.ceil((data - hoje) / (1000 * 60 * 60 * 24));
+
+            if (diffDias < 0) {
+                return { texto: 'Vencido', classe: 'badge-danger' };
+            } else if (diffDias <= 5) {
+                return { texto: `${diffDias} dia(s)`, classe: 'badge-warning' };
+            } else {
+                return { texto: `${diffDias} dias`, classe: 'badge-success' };
+            }
+        }
+
+        /**
+         * Formata data para exibição
+         */
+        function formatarData(data) {
+            return data.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                weekday: 'short'
+            });
+        }
+
+        /**
+         * Exibe os resultados na tabela
+         */
+        function exibirResultados() {
+            const corpo = document.getElementById('corpoTabela');
+            corpo.innerHTML = '';
+
+            estadoApp.resultados.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${r.fase}</strong></td>
+                    <td>${r.prazo}</td>
+                    <td>${r.inicio}</td>
+                    <td>${r.vencimento}${r.prorrogado ? ' *' : ''}</td>
+                    <td><span class="badge ${r.status.classe}">${r.status.texto}</span></td>
+                `;
+                corpo.appendChild(tr);
+            });
+
+            // Exibe observações
+            const listaObs = document.getElementById('listaObservacoes');
+            listaObs.innerHTML = '';
+
+            if (estadoApp.observacoes.length > 0) {
+                estadoApp.observacoes.forEach(obs => {
+                    const li = document.createElement('li');
+                    li.textContent = obs;
+                    listaObs.appendChild(li);
+                });
+                document.getElementById('observacoesResultado').style.display = 'block';
+            } else {
+                document.getElementById('observacoesResultado').style.display = 'none';
+            }
+        }
+
+        /**
+         * Inicia novo cálculo
+         */
+        function novoCalculo() {
+            estadoApp.resultados = [];
+            estadoApp.observacoes = [];
+            avancarEtapa(1);
+        }
+
+        /**
+         * Exporta para impressão/PDF
+         */
+        function exportarPDF() {
+            window.print();
+        }
+
+        // ===== FUNÇÕES DO MODAL DE FERIADOS =====
+
+        function abrirModalFeriados() {
+            document.getElementById('modalFeriados').classList.add('visible');
+            atualizarListaFeriados();
+            atualizarListaSuspensoes();
+        }
+
+        function fecharModalFeriados() {
+            document.getElementById('modalFeriados').classList.remove('visible');
+        }
+
+        function adicionarSuspensao() {
+            const inicio = document.getElementById('suspensaoInicio').value;
+            const fim = document.getElementById('suspensaoFim').value;
+            const descricao = document.getElementById('suspensaoDescricao').value;
+
+            if (!inicio || !fim || !descricao) {
+                mostrarToast('Preencha todos os campos', 'error');
+                return;
+            }
+
+            if (new Date(fim) < new Date(inicio)) {
+                mostrarToast('Data fim deve ser maior que data início', 'error');
+                return;
+            }
+
+            CONFIG.suspensoes.push({ inicio, fim, descricao });
+            
+            // Salva no localStorage
+            localStorage.setItem('cprazos_suspensoes', JSON.stringify(CONFIG.suspensoes));
+
+            // Limpa campos
+            document.getElementById('suspensaoInicio').value = '';
+            document.getElementById('suspensaoFim').value = '';
+            document.getElementById('suspensaoDescricao').value = '';
+
+            atualizarListaSuspensoes();
+            mostrarToast('Suspensão adicionada com sucesso', 'success');
+        }
+
+        function removerSuspensao(index) {
+            CONFIG.suspensoes.splice(index, 1);
+            localStorage.setItem('cprazos_suspensoes', JSON.stringify(CONFIG.suspensoes));
+            atualizarListaSuspensoes();
+            mostrarToast('Suspensão removida', 'success');
+        }
+
+        function atualizarListaSuspensoes() {
+            const container = document.getElementById('listaSuspensoes');
+            
+            if (CONFIG.suspensoes.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">Nenhuma suspensão cadastrada</p>';
+                return;
+            }
+
+            container.innerHTML = CONFIG.suspensoes.map((s, i) => `
+                <div class="feriado-item">
+                    <div class="feriado-info">
+                        <span class="feriado-data">${formatarDataSimples(s.inicio)} a ${formatarDataSimples(s.fim)}</span>
+                        <span class="feriado-nome">${s.descricao}</span>
+                    </div>
+                    <button class="btn-remove-fase" onclick="removerSuspensao(${i})">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function atualizarListaFeriados() {
+            const container = document.getElementById('listaFeriados');
+            const anoAtual = new Date().getFullYear();
+
+            container.innerHTML = FERIADOS_FIXOS.map(f => {
+                const [mes, dia] = f.data.split('-');
+                return `
+                    <div class="feriado-item">
+                        <div class="feriado-info">
+                            <span class="feriado-data">${dia}/${mes}/${anoAtual}</span>
+                            <span class="feriado-nome">${f.nome}</span>
+                        </div>
+                        <span class="feriado-tipo">Nacional</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatarDataSimples(dataStr) {
+            const data = new Date(dataStr + 'T12:00:00');
+            return data.toLocaleDateString('pt-BR');
+        }
+
+        // ===== TOAST ===== 
+
+        function mostrarToast(mensagem, tipo = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${tipo}`;
+            toast.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    ${tipo === 'success' ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>' : ''}
+                    ${tipo === 'error' ? '<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>' : ''}
+                    ${tipo === 'warning' ? '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>' : ''}
+                    ${tipo === 'info' ? '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>' : ''}
+                </svg>
+                <span>${mensagem}</span>
+            `;
+            
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ===== TEMA =====
+
+        function alternarTema() {
+            const html = document.documentElement;
+            const temaAtual = html.getAttribute('data-theme');
+            
+            if (temaAtual === 'dark') {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('cprazos_tema', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('cprazos_tema', 'dark');
+            }
+        }
+
+        // ===== INICIALIZAÇÃO =====
+
+        function init() {
+            // Carrega tema salvo
+            const temaSalvo = localStorage.getItem('cprazos_tema');
+            if (temaSalvo === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+
+            // Carrega suspensões salvas
+            const suspensoesSalvas = localStorage.getItem('cprazos_suspensoes');
+            if (suspensoesSalvas) {
+                CONFIG.suspensoes = JSON.parse(suspensoesSalvas);
+            }
+
+            // Popula dropdown de estados
+            const selectEstado = document.getElementById('estado');
+            ESTADOS.forEach(estado => {
+                const option = document.createElement('option');
+                option.value = estado.sigla;
+                option.textContent = `${estado.sigla} - ${estado.nome}`;
+                selectEstado.appendChild(option);
+            });
+
+            // Fecha modal ao clicar fora
+            document.getElementById('modalFeriados').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    fecharModalFeriados();
+                }
+            });
+
+            // Fecha autocomplete ao clicar fora
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.autocomplete-container')) {
+                    document.getElementById('listaCidades').classList.remove('visible');
+                }
+            });
+
+            // Busca feriados da API (com fallback)
+            buscarFeriadosAPI();
+        }
+
+        /**
+         * Busca feriados da BrasilAPI
+         */
+        async function buscarFeriadosAPI() {
+            const ano = new Date().getFullYear();
+            
+            try {
+                const response = await fetch(`https://brasilapi.com.br/api/feriados/v1/${ano}`);
+                
+                if (response.ok) {
+                    const feriados = await response.json();
+                    // Atualiza a lista de feriados
+                    CONFIG.feriados.nacionais = feriados.map(f => ({
+                        data: f.date,
+                        nome: f.name
+                    }));
+                    mostrarToast('Feriados atualizados via BrasilAPI', 'success');
+                }
+            } catch (error) {
+                console.log('Usando feriados locais (API indisponível)');
+                // Já temos os feriados fixos como fallback
+            }
+        }
+
+        // Inicia a aplicação quando o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
