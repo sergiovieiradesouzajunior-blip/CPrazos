@@ -1121,7 +1121,7 @@
             { sigla: "TO", nome: "Tocantins" }
         ];
 
-        // Feriados fixos nacionais
+        // Feriados fixos nacionais (datas que não mudam)
         const FERIADOS_FIXOS = [
             { data: "01-01", nome: "Confraternização Universal" },
             { data: "04-21", nome: "Tiradentes" },
@@ -1130,7 +1130,18 @@
             { data: "10-12", nome: "Nossa Senhora Aparecida" },
             { data: "11-02", nome: "Finados" },
             { data: "11-15", nome: "Proclamação da República" },
+            { data: "11-20", nome: "Dia da Consciência Negra" },
             { data: "12-25", nome: "Natal" }
+        ];
+        
+        // Feriados móveis 2026 (fallback caso a API falhe)
+        // Estes são calculados com base na Páscoa de 2026 (05/04/2026)
+        const FERIADOS_MOVEIS_2026 = [
+            { data: "2026-02-16", nome: "Carnaval" },
+            { data: "2026-02-17", nome: "Carnaval" },
+            { data: "2026-04-03", nome: "Sexta-feira Santa" },
+            { data: "2026-04-05", nome: "Páscoa" },
+            { data: "2026-06-04", nome: "Corpus Christi" }
         ];
 
         // Cidades mock (algumas principais por estado)
@@ -1708,10 +1719,28 @@
 
         /**
          * Verifica se a data é feriado
+         * Verifica: feriados fixos, feriados da API, e feriados móveis de fallback
          */
         function isFeriado(data) {
             const mesdia = `${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`;
-            return FERIADOS_FIXOS.some(f => f.data === mesdia);
+            const dataISO = `${data.getFullYear()}-${mesdia}`;
+            
+            // Verifica feriados fixos (formato MM-DD)
+            if (FERIADOS_FIXOS.some(f => f.data === mesdia)) {
+                return true;
+            }
+            
+            // Verifica feriados da API (formato YYYY-MM-DD)
+            if (CONFIG.feriados.nacionais.some(f => f.data === dataISO)) {
+                return true;
+            }
+            
+            // Verifica feriados móveis de fallback 2026 (formato YYYY-MM-DD)
+            if (FERIADOS_MOVEIS_2026.some(f => f.data === dataISO)) {
+                return true;
+            }
+            
+            return false;
         }
 
         /**
@@ -1719,8 +1748,21 @@
          */
         function getFeriadoNome(data) {
             const mesdia = `${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`;
-            const feriado = FERIADOS_FIXOS.find(f => f.data === mesdia);
-            return feriado ? feriado.nome : null;
+            const dataISO = `${data.getFullYear()}-${mesdia}`;
+            
+            // Busca em feriados fixos
+            const feriadoFixo = FERIADOS_FIXOS.find(f => f.data === mesdia);
+            if (feriadoFixo) return feriadoFixo.nome;
+            
+            // Busca em feriados da API
+            const feriadoAPI = CONFIG.feriados.nacionais.find(f => f.data === dataISO);
+            if (feriadoAPI) return feriadoAPI.nome;
+            
+            // Busca em feriados móveis de fallback
+            const feriadoMovel = FERIADOS_MOVEIS_2026.find(f => f.data === dataISO);
+            if (feriadoMovel) return feriadoMovel.nome;
+            
+            return null;
         }
 
         /**
