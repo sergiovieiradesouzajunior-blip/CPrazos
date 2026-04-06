@@ -1569,6 +1569,13 @@
 
         /**
          * Calcula a data final considerando as regras
+         * 
+         * Regras de contagem:
+         * - CPC/2015 (Art. 219): Exclui dia inicial, inclui dia final, só dias úteis, prorroga
+         * - CPP (Art. 798): Inclui dia inicial, inclui dia final, dias corridos, não prorroga
+         * - CC (Art. 132): Exclui dia inicial, inclui dia final, dias corridos, prorroga
+         * - Penal Material (CP Art. 10): Inclui dia inicial, inclui dia final, dias corridos, não prorroga
+         * - Lei 9.784/99 (Art. 66): Exclui dia inicial, inclui dia final, dias corridos, prorroga
          */
         function calcularDataFinal(dataInicio, prazo, unidade, tipoContagem, regra) {
             let data = new Date(dataInicio);
@@ -1576,11 +1583,6 @@
             let prorrogado = false;
             let motivoProrrogacao = '';
             let feriadosEncontrados = [];
-
-            // Se não inclui dia inicial, avança um dia
-            if (!regra.incluiDiaInicial) {
-                data.setDate(data.getDate() + 1);
-            }
 
             // Calcula com base na unidade
             switch (unidade) {
@@ -1610,13 +1612,19 @@
                 case 'dias':
                 default:
                     if (tipoContagem === 'uteis' || regra.tipo === 'uteis') {
-                        // Contagem em dias úteis
+                        // Contagem em dias ÚTEIS
+                        // Regra CPC Art. 219: exclui dia inicial, conta só dias úteis
                         let diasContados = 0;
+                        
                         while (diasContados < prazo) {
+                            // Avança para o próximo dia
                             data.setDate(data.getDate() + 1);
+                            
+                            // Só conta se for dia útil
                             if (isDiaUtil(data)) {
                                 diasContados++;
                             } else {
+                                // Registra o motivo (feriado, fim de semana, etc.)
                                 const motivo = getMotivoDiaNaoUtil(data);
                                 if (motivo && !feriadosEncontrados.includes(motivo)) {
                                     feriadosEncontrados.push(motivo);
@@ -1624,8 +1632,14 @@
                             }
                         }
                     } else {
-                        // Contagem em dias corridos
-                        data.setDate(data.getDate() + prazo - 1);
+                        // Contagem em dias CORRIDOS
+                        if (regra.incluiDiaInicial) {
+                            // CPP/Penal: inclui dia inicial, então avança (prazo - 1) dias
+                            data.setDate(data.getDate() + prazo - 1);
+                        } else {
+                            // CC/Administrativo: exclui dia inicial, então avança prazo dias
+                            data.setDate(data.getDate() + prazo);
+                        }
                     }
                     break;
             }
